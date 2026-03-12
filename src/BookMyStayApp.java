@@ -1,31 +1,32 @@
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Service
+ * BookingHistory
  *
- * Represents an optional add-on service.
+ * Stores confirmed reservations in insertion order.
  *
  * @author Tirth
- * @version 7.0
+ * @version 8.0
  */
 
-public class Service {
+public class BookingHistory {
 
-    private String serviceName;
-    private double price;
+    private List<Reservation> bookingList;
 
-    public Service(String serviceName, double price) {
-        this.serviceName = serviceName;
-        this.price = price;
+    public BookingHistory() {
+        bookingList = new ArrayList<>();
     }
 
-    public String getServiceName() {
-        return serviceName;
+    // Add confirmed reservation
+    public void addReservation(Reservation reservation) {
+        bookingList.add(reservation);
+        System.out.println("Reservation stored in history for "
+                + reservation.getGuestName());
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void displayService() {
-        System.out.println(serviceName + " - $" + price);
+    // Retrieve booking history
+    public List<Reservation> getAllReservations() {
+        return bookingList;
     }
 }
