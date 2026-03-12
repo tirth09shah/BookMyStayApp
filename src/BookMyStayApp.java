@@ -1,67 +1,31 @@
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
 /**
- * RoomAllocationService
+ * Service
  *
- * Processes booking requests and allocates rooms safely.
- * Prevents duplicate room allocation using a Set.
+ * Represents an optional add-on service.
  *
  * @author Tirth
- * @version 6.0
+ * @version 7.0
  */
 
-public class RoomAllocationService {
+public class Service {
 
-    private RoomInventory inventory;
-    private Map<String, Set<String>> allocatedRooms;
-    private int roomCounter = 1;
+    private String serviceName;
+    private double price;
 
-    public RoomAllocationService(RoomInventory inventory) {
-        this.inventory = inventory;
-        allocatedRooms = new HashMap<>();
+    public Service(String serviceName, double price) {
+        this.serviceName = serviceName;
+        this.price = price;
     }
 
-    public void processBookings(Queue<Reservation> bookingQueue) {
+    public String getServiceName() {
+        return serviceName;
+    }
 
-        System.out.println("\nProcessing Booking Requests...\n");
+    public double getPrice() {
+        return price;
+    }
 
-        while (!bookingQueue.isEmpty()) {
-
-            Reservation request = bookingQueue.poll();
-            String roomType = request.getRoomType();
-
-            int available = inventory.getAvailability(roomType);
-
-            if (available > 0) {
-
-                // Generate unique room ID
-                String roomId = roomType.replace(" ", "") + "-" + roomCounter++;
-
-                // Store allocated room ID
-                allocatedRooms
-                        .computeIfAbsent(roomType, k -> new HashSet<>())
-                        .add(roomId);
-
-                // Update inventory
-                inventory.updateAvailability(roomType, available - 1);
-
-                System.out.println("Reservation Confirmed for "
-                        + request.getGuestName());
-                System.out.println("Room Type: " + roomType);
-                System.out.println("Assigned Room ID: " + roomId);
-                System.out.println("--------------------------------");
-
-            } else {
-
-                System.out.println("Reservation Failed for "
-                        + request.getGuestName());
-                System.out.println("No rooms available for: " + roomType);
-                System.out.println("--------------------------------");
-            }
-        }
+    public void displayService() {
+        System.out.println(serviceName + " - $" + price);
     }
 }
