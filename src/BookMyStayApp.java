@@ -1,38 +1,47 @@
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Abstract class representing a generic Room.
- * Defines common properties shared by all room types.
+ * RoomInventory
+ *
+ * Manages centralized room availability using a HashMap.
+ * This class acts as the single source of truth for inventory state.
  *
  * @author Tirth
- * @version 2.1
+ * @version 3.1
  */
 
-public abstract class Room {
+public class RoomInventory {
 
-    private String roomType;
-    private int beds;
-    private double price;
+    private Map<String, Integer> inventory;
 
-    public Room(String roomType, int beds, double price) {
-        this.roomType = roomType;
-        this.beds = beds;
-        this.price = price;
+    // Constructor initializes inventory
+    public RoomInventory() {
+        inventory = new HashMap<>();
+
+        // Initial room availability
+        inventory.put("Single Room", 5);
+        inventory.put("Double Room", 3);
+        inventory.put("Suite Room", 2);
     }
 
-    public String getRoomType() {
-        return roomType;
+    // Retrieve availability of a specific room type
+    public int getAvailability(String roomType) {
+        return inventory.getOrDefault(roomType, 0);
     }
 
-    public int getBeds() {
-        return beds;
+    // Update availability
+    public void updateAvailability(String roomType, int count) {
+        inventory.put(roomType, count);
     }
 
-    public double getPrice() {
-        return price;
-    }
+    // Display full inventory
+    public void displayInventory() {
 
-    public void displayRoomDetails() {
-        System.out.println("Room Type : " + roomType);
-        System.out.println("Beds      : " + beds);
-        System.out.println("Price     : $" + price);
+        System.out.println("\nCurrent Room Inventory\n");
+
+        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue() + " rooms available");
+        }
     }
 }
