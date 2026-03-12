@@ -1,47 +1,31 @@
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * RoomInventory
+ * Reservation
  *
- * Manages centralized room availability using a HashMap.
- * This class acts as the single source of truth for inventory state.
+ * Represents a guest booking request for a specific room type.
  *
  * @author Tirth
- * @version 3.1
+ * @version 5.0
  */
 
-public class RoomInventory {
+public class Reservation {
 
-    private Map<String, Integer> inventory;
+    private String guestName;
+    private String roomType;
 
-    // Constructor initializes inventory
-    public RoomInventory() {
-        inventory = new HashMap<>();
-
-        // Initial room availability
-        inventory.put("Single Room", 5);
-        inventory.put("Double Room", 3);
-        inventory.put("Suite Room", 2);
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 
-    // Retrieve availability of a specific room type
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
+    public String getGuestName() {
+        return guestName;
     }
 
-    // Update availability
-    public void updateAvailability(String roomType, int count) {
-        inventory.put(roomType, count);
+    public String getRoomType() {
+        return roomType;
     }
 
-    // Display full inventory
-    public void displayInventory() {
-
-        System.out.println("\nCurrent Room Inventory\n");
-
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue() + " rooms available");
-        }
+    public void displayReservation() {
+        System.out.println("Guest: " + guestName + " | Requested Room: " + roomType);
     }
 }
