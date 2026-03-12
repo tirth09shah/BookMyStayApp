@@ -1,47 +1,39 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
- * RoomInventory
+ * RoomSearchService
  *
- * Manages centralized room availability using a HashMap.
- * This class acts as the single source of truth for inventory state.
+ * Handles read-only search operations for available rooms.
+ * This class retrieves availability from RoomInventory and
+ * displays only rooms that are currently available.
  *
  * @author Tirth
- * @version 3.1
+ * @version 4.1
  */
 
-public class RoomInventory {
+public class RoomSearchService {
 
-    private Map<String, Integer> inventory;
+    private RoomInventory inventory;
 
-    // Constructor initializes inventory
-    public RoomInventory() {
-        inventory = new HashMap<>();
-
-        // Initial room availability
-        inventory.put("Single Room", 5);
-        inventory.put("Double Room", 3);
-        inventory.put("Suite Room", 2);
+    public RoomSearchService(RoomInventory inventory) {
+        this.inventory = inventory;
     }
 
-    // Retrieve availability of a specific room type
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
-    }
+    public void searchAvailableRooms(List<Room> rooms) {
 
-    // Update availability
-    public void updateAvailability(String roomType, int count) {
-        inventory.put(roomType, count);
-    }
+        System.out.println("\nAvailable Rooms\n");
 
-    // Display full inventory
-    public void displayInventory() {
+        for (Room room : rooms) {
 
-        System.out.println("\nCurrent Room Inventory\n");
+            int available = inventory.getAvailability(room.getRoomType());
 
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue() + " rooms available");
+            // Defensive programming: show only available rooms
+            if (available > 0) {
+
+                room.displayRoomDetails();
+                System.out.println("Available : " + available);
+                System.out.println("-----------------------------");
+            }
         }
     }
 }
