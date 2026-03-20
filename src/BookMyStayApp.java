@@ -1,103 +1,79 @@
 /**
- * Use Case 4: Room Search & Availability Check
+ * Use Case 5: Booking Request (First-Come-First-Served)
  *
- * Demonstrates read-only access to inventory and filtering
- * of available rooms without modifying system state.
+ * Demonstrates use of Queue to handle booking requests
+ * in FIFO order without modifying inventory.
  *
  * @author Tirth
- * @version 4.0
+ * @version 5.0
  */
 
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
-// Inventory Class (same concept from UC3)
-class RoomInventory {
+// Reservation class (represents booking request)
+class Reservation {
 
-    private HashMap<String, Integer> inventory;
-
-    public RoomInventory() {
-        inventory = new HashMap<>();
-    }
-
-    public void addRoom(String roomType, int count) {
-        inventory.put(roomType, count);
-    }
-
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
-    }
-
-    public HashMap<String, Integer> getAllRooms() {
-        return inventory;
-    }
-}
-
-// Room class (domain model)
-class Room {
-
+    private String guestName;
     private String roomType;
-    private double price;
 
-    public Room(String roomType, double price) {
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
         this.roomType = roomType;
-        this.price = price;
+    }
+
+    public String getGuestName() {
+        return guestName;
     }
 
     public String getRoomType() {
         return roomType;
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void displayDetails() {
-        System.out.println("Room Type : " + roomType);
-        System.out.println("Price     : $" + price);
+    public void display() {
+        System.out.println("Guest Name : " + guestName);
+        System.out.println("Room Type  : " + roomType);
     }
 }
 
-// Search Service (read-only logic)
-class RoomSearchService {
+// Booking Queue (FIFO structure)
+class BookingQueue {
 
-    public void searchAvailableRooms(RoomInventory inventory, Room[] rooms) {
+    private Queue<Reservation> queue;
 
-        System.out.println("===== Available Rooms =====\n");
+    public BookingQueue() {
+        queue = new LinkedList<>();
+    }
 
-        for (Room room : rooms) {
-            int available = inventory.getAvailability(room.getRoomType());
+    // Add request
+    public void addRequest(Reservation reservation) {
+        queue.offer(reservation);
+    }
 
-            // Show only available rooms
-            if (available > 0) {
-                room.displayDetails();
-                System.out.println("Available : " + available);
-                System.out.println();
-            }
+    // View all requests
+    public void displayQueue() {
+        System.out.println("===== Booking Requests (FIFO Order) =====\n");
+
+        for (Reservation r : queue) {
+            r.display();
+            System.out.println();
         }
     }
 }
 
-public class UseCase4RoomSearch {
+public class UseCase5BookingQueue {
 
     public static void main(String[] args) {
 
-        // Setup inventory (state)
-        RoomInventory inventory = new RoomInventory();
-        inventory.addRoom("Single Room", 5);
-        inventory.addRoom("Double Room", 0); // Not available
-        inventory.addRoom("Suite Room", 2);
+        // Initialize booking queue
+        BookingQueue bookingQueue = new BookingQueue();
 
-        // Room objects (domain)
-        Room[] rooms = {
-                new Room("Single Room", 100.0),
-                new Room("Double Room", 180.0),
-                new Room("Suite Room", 300.0)
-        };
+        // Add booking requests (FIFO order)
+        bookingQueue.addRequest(new Reservation("Alice", "Single Room"));
+        bookingQueue.addRequest(new Reservation("Bob", "Double Room"));
+        bookingQueue.addRequest(new Reservation("Charlie", "Suite Room"));
 
-        // Search service
-        RoomSearchService searchService = new RoomSearchService();
-
-        // Perform search (READ ONLY)
-        searchService.searchAvailableRooms(inventory, rooms);
+        // Display queue (NO allocation yet)
+        bookingQueue.displayQueue();
     }
 }
