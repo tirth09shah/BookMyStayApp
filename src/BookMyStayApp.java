@@ -1,74 +1,62 @@
 /**
- * Use Case 9: Error Handling & Validation
+ * Use Case 10: Booking Cancellation & Inventory Rollback
  *
- * Demonstrates input validation and custom exception handling.
+ * Demonstrates rollback using Stack (LIFO).
  *
  * @author Tirth
- * @version 9.0
+ * @version 10.0
  */
 
 import java.util.*;
 
-// Custom Exception
-class InvalidBookingException extends Exception {
-    public InvalidBookingException(String message) {
-        super(message);
-    }
-}
-
-// Inventory class
+// Inventory
 class RoomInventory {
-
     private Map<String, Integer> inventory = new HashMap<>();
 
     public void addRoom(String type, int count) {
         inventory.put(type, count);
     }
 
-    public int getAvailability(String type) {
-        return inventory.getOrDefault(type, -1);
+    public void increaseRoom(String type) {
+        inventory.put(type, inventory.getOrDefault(type, 0) + 1);
     }
 
-    public void reduceRoom(String type) {
-        inventory.put(type, getAvailability(type) - 1);
-    }
-}
-
-// Validator
-class BookingValidator {
-
-    public void validate(String roomType, RoomInventory inventory) throws InvalidBookingException {
-
-        if (inventory.getAvailability(roomType) == -1) {
-            throw new InvalidBookingException("Invalid room type!");
-        }
-
-        if (inventory.getAvailability(roomType) <= 0) {
-            throw new InvalidBookingException("No rooms available!");
-        }
+    public void display() {
+        System.out.println("Inventory: " + inventory);
     }
 }
 
-public class UseCase9ErrorHandlingValidation {
+// Cancellation Service
+class CancellationService {
+
+    private Stack<String> rollbackStack = new Stack<>();
+
+    public void cancelBooking(String reservationId, String roomType, RoomInventory inventory) {
+
+        System.out.println("Cancelling Reservation: " + reservationId);
+
+        // Push to stack (track rollback)
+        rollbackStack.push(reservationId);
+
+        // Restore inventory
+        inventory.increaseRoom(roomType);
+
+        System.out.println("Cancellation successful. Inventory restored.");
+    }
+}
+
+public class UseCase10BookingCancellation {
 
     public static void main(String[] args) {
 
         RoomInventory inventory = new RoomInventory();
         inventory.addRoom("Single Room", 1);
 
-        BookingValidator validator = new BookingValidator();
+        CancellationService service = new CancellationService();
 
-        String requestedRoom = "Single Room";
+        // Cancel booking
+        service.cancelBooking("RES-101", "Single Room", inventory);
 
-        try {
-            validator.validate(requestedRoom, inventory);
-
-            inventory.reduceRoom(requestedRoom);
-
-            System.out.println("Booking Successful for " + requestedRoom);
-
-        } catch (InvalidBookingException e) {
-            System.out.println("Booking Failed: " + e.getMessage());
-        }
+        inventory.display();
     }
 }
