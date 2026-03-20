@@ -1,72 +1,103 @@
 /**
- * Use Case 3: Centralized Room Inventory Management
+ * Use Case 4: Room Search & Availability Check
  *
- * Demonstrates use of HashMap for centralized inventory handling.
+ * Demonstrates read-only access to inventory and filtering
+ * of available rooms without modifying system state.
  *
  * @author Tirth
- * @version 3.0
+ * @version 4.0
  */
 
 import java.util.HashMap;
 
+// Inventory Class (same concept from UC3)
 class RoomInventory {
 
     private HashMap<String, Integer> inventory;
 
-    // Constructor initializes inventory
     public RoomInventory() {
         inventory = new HashMap<>();
     }
 
-    // Add room type with count
     public void addRoom(String roomType, int count) {
         inventory.put(roomType, count);
     }
 
-    // Get availability
     public int getAvailability(String roomType) {
         return inventory.getOrDefault(roomType, 0);
     }
 
-    // Update availability
-    public void updateAvailability(String roomType, int count) {
-        inventory.put(roomType, count);
+    public HashMap<String, Integer> getAllRooms() {
+        return inventory;
+    }
+}
+
+// Room class (domain model)
+class Room {
+
+    private String roomType;
+    private double price;
+
+    public Room(String roomType, double price) {
+        this.roomType = roomType;
+        this.price = price;
     }
 
-    // Display full inventory
-    public void displayInventory() {
-        System.out.println("===== Room Inventory =====");
-        for (String type : inventory.keySet()) {
-            System.out.println(type + " Available: " + inventory.get(type));
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void displayDetails() {
+        System.out.println("Room Type : " + roomType);
+        System.out.println("Price     : $" + price);
+    }
+}
+
+// Search Service (read-only logic)
+class RoomSearchService {
+
+    public void searchAvailableRooms(RoomInventory inventory, Room[] rooms) {
+
+        System.out.println("===== Available Rooms =====\n");
+
+        for (Room room : rooms) {
+            int available = inventory.getAvailability(room.getRoomType());
+
+            // Show only available rooms
+            if (available > 0) {
+                room.displayDetails();
+                System.out.println("Available : " + available);
+                System.out.println();
+            }
         }
     }
 }
 
-public class UseCase3InventorySetup {
+public class UseCase4RoomSearch {
 
     public static void main(String[] args) {
 
-        // Initialize inventory
+        // Setup inventory (state)
         RoomInventory inventory = new RoomInventory();
-
-        // Add room types
         inventory.addRoom("Single Room", 5);
-        inventory.addRoom("Double Room", 3);
+        inventory.addRoom("Double Room", 0); // Not available
         inventory.addRoom("Suite Room", 2);
 
-        // Display inventory
-        inventory.displayInventory();
+        // Room objects (domain)
+        Room[] rooms = {
+                new Room("Single Room", 100.0),
+                new Room("Double Room", 180.0),
+                new Room("Suite Room", 300.0)
+        };
 
-        System.out.println();
+        // Search service
+        RoomSearchService searchService = new RoomSearchService();
 
-        // Example: Check availability
-        System.out.println("Checking availability for Single Room: "
-                + inventory.getAvailability("Single Room"));
-
-        // Example: Update availability
-        inventory.updateAvailability("Single Room", 4);
-
-        System.out.println("After booking 1 Single Room:");
-        inventory.displayInventory();
+        // Perform search (READ ONLY)
+        searchService.searchAvailableRooms(inventory, rooms);
     }
 }
