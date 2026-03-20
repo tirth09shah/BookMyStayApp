@@ -1,67 +1,73 @@
 /**
- * Use Case 11: Concurrent Booking Simulation
+ * Use Case 12: Data Persistence & System Recovery
  *
- * Demonstrates thread-safe booking using synchronization.
+ * Demonstrates saving and loading system state using serialization.
  *
  * @author Tirth
- * @version 11.0
+ * @version 12.0
  */
 
+import java.io.*;
 import java.util.*;
 
-// Shared Inventory
-class RoomInventory {
+// Serializable Inventory
+class RoomInventory implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Map<String, Integer> inventory = new HashMap<>();
 
-    public RoomInventory() {
-        inventory.put("Single Room", 2);
+    public void addRoom(String type, int count) {
+        inventory.put(type, count);
     }
 
-    // synchronized critical section
-    public synchronized boolean bookRoom(String type) {
+    public void display() {
+        System.out.println("Inventory: " + inventory);
+    }
+}
 
-        int available = inventory.getOrDefault(type, 0);
+// Persistence Service
+class PersistenceService {
 
-        if (available > 0) {
-            inventory.put(type, available - 1);
-            System.out.println(Thread.currentThread().getName() + " booked " + type);
-            return true;
-        } else {
-            System.out.println(Thread.currentThread().getName() + " failed (no rooms)");
-            return false;
+    private static final String FILE_NAME = "inventory.dat";
+
+    // Save
+    public void save(RoomInventory inventory) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(inventory);
+            System.out.println("Data saved successfully.");
+        } catch (Exception e) {
+            System.out.println("Error saving data.");
+        }
+    }
+
+    // Load
+    public RoomInventory load() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            System.out.println("Data loaded successfully.");
+            return (RoomInventory) ois.readObject();
+        } catch (Exception e) {
+            System.out.println("No previous data found. Starting fresh.");
+            return new RoomInventory();
         }
     }
 }
 
-// Booking Task (Thread)
-class BookingTask implements Runnable {
-
-    private RoomInventory inventory;
-
-    public BookingTask(RoomInventory inventory) {
-        this.inventory = inventory;
-    }
-
-    @Override
-    public void run() {
-        inventory.bookRoom("Single Room");
-    }
-}
-
-public class UseCase11ConcurrentBookingSimulation {
+public class UseCase12DataPersistenceRecovery {
 
     public static void main(String[] args) {
 
-        RoomInventory inventory = new RoomInventory();
+        PersistenceService service = new PersistenceService();
 
-        // Simulate multiple users
-        Thread t1 = new Thread(new BookingTask(inventory), "User-1");
-        Thread t2 = new Thread(new BookingTask(inventory), "User-2");
-        Thread t3 = new Thread(new BookingTask(inventory), "User-3");
+        // Load previous state
+        RoomInventory inventory = service.load();
 
-        t1.start();
-        t2.start();
-        t3.start();
+        // Modify state
+        inventory.addRoom("Single Room", 5);
+
+        inventory.display();
+
+        // Save state
+        service.save(inventory);
     }
 }
