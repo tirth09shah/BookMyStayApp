@@ -1,62 +1,67 @@
 /**
- * Use Case 10: Booking Cancellation & Inventory Rollback
+ * Use Case 11: Concurrent Booking Simulation
  *
- * Demonstrates rollback using Stack (LIFO).
+ * Demonstrates thread-safe booking using synchronization.
  *
  * @author Tirth
- * @version 10.0
+ * @version 11.0
  */
 
 import java.util.*;
 
-// Inventory
+// Shared Inventory
 class RoomInventory {
+
     private Map<String, Integer> inventory = new HashMap<>();
 
-    public void addRoom(String type, int count) {
-        inventory.put(type, count);
+    public RoomInventory() {
+        inventory.put("Single Room", 2);
     }
 
-    public void increaseRoom(String type) {
-        inventory.put(type, inventory.getOrDefault(type, 0) + 1);
-    }
+    // synchronized critical section
+    public synchronized boolean bookRoom(String type) {
 
-    public void display() {
-        System.out.println("Inventory: " + inventory);
-    }
-}
+        int available = inventory.getOrDefault(type, 0);
 
-// Cancellation Service
-class CancellationService {
-
-    private Stack<String> rollbackStack = new Stack<>();
-
-    public void cancelBooking(String reservationId, String roomType, RoomInventory inventory) {
-
-        System.out.println("Cancelling Reservation: " + reservationId);
-
-        // Push to stack (track rollback)
-        rollbackStack.push(reservationId);
-
-        // Restore inventory
-        inventory.increaseRoom(roomType);
-
-        System.out.println("Cancellation successful. Inventory restored.");
+        if (available > 0) {
+            inventory.put(type, available - 1);
+            System.out.println(Thread.currentThread().getName() + " booked " + type);
+            return true;
+        } else {
+            System.out.println(Thread.currentThread().getName() + " failed (no rooms)");
+            return false;
+        }
     }
 }
 
-public class UseCase10BookingCancellation {
+// Booking Task (Thread)
+class BookingTask implements Runnable {
+
+    private RoomInventory inventory;
+
+    public BookingTask(RoomInventory inventory) {
+        this.inventory = inventory;
+    }
+
+    @Override
+    public void run() {
+        inventory.bookRoom("Single Room");
+    }
+}
+
+public class UseCase11ConcurrentBookingSimulation {
 
     public static void main(String[] args) {
 
         RoomInventory inventory = new RoomInventory();
-        inventory.addRoom("Single Room", 1);
 
-        CancellationService service = new CancellationService();
+        // Simulate multiple users
+        Thread t1 = new Thread(new BookingTask(inventory), "User-1");
+        Thread t2 = new Thread(new BookingTask(inventory), "User-2");
+        Thread t3 = new Thread(new BookingTask(inventory), "User-3");
 
-        // Cancel booking
-        service.cancelBooking("RES-101", "Single Room", inventory);
-
-        inventory.display();
+        t1.start();
+        t2.start();
+        t3.start();
     }
 }
