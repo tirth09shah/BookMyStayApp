@@ -1,71 +1,78 @@
 /**
- * Use Case 7: Add-On Service Selection
+ * Use Case 8: Booking History & Reporting
  *
- * Demonstrates mapping of reservations to multiple services
- * using Map + List and cost aggregation.
+ * Demonstrates storing confirmed bookings in a List
+ * and generating simple reports.
  *
  * @author Tirth
- * @version 7.0
+ * @version 8.0
  */
 
 import java.util.*;
 
-// Service class
-class Service {
-    private String name;
-    private double cost;
+// Reservation class
+class Reservation {
+    private String guestName;
+    private String roomType;
 
-    public Service(String name, double cost) {
-        this.name = name;
-        this.cost = cost;
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 
-    public double getCost() {
-        return cost;
+    public String getGuestName() {
+        return guestName;
     }
 
-    public String getName() {
-        return name;
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public void display() {
+        System.out.println("Guest: " + guestName + ", Room: " + roomType);
     }
 }
 
-// Manager class
-class AddOnServiceManager {
+// Booking History
+class BookingHistory {
 
-    private Map<String, List<Service>> serviceMap = new HashMap<>();
+    private List<Reservation> history = new ArrayList<>();
 
-    public void addService(String reservationId, Service service) {
-        serviceMap.putIfAbsent(reservationId, new ArrayList<>());
-        serviceMap.get(reservationId).add(service);
+    public void addReservation(Reservation r) {
+        history.add(r);
     }
 
-    public void displayServices(String reservationId) {
-        System.out.println("Services for Reservation: " + reservationId);
+    public List<Reservation> getAll() {
+        return history;
+    }
+}
 
-        List<Service> services = serviceMap.getOrDefault(reservationId, new ArrayList<>());
-        double total = 0;
+// Report Service
+class ReportService {
 
-        for (Service s : services) {
-            System.out.println("- " + s.getName() + " ($" + s.getCost() + ")");
-            total += s.getCost();
+    public void generateReport(List<Reservation> history) {
+
+        System.out.println("===== Booking Report =====");
+
+        for (Reservation r : history) {
+            r.display();
         }
 
-        System.out.println("Total Add-On Cost: $" + total);
+        System.out.println("Total Bookings: " + history.size());
     }
 }
 
-public class UseCase7AddOnServiceSelection {
+public class UseCase8BookingHistoryReport {
 
     public static void main(String[] args) {
 
-        AddOnServiceManager manager = new AddOnServiceManager();
+        BookingHistory history = new BookingHistory();
 
-        String reservationId = "RES-101";
+        history.addReservation(new Reservation("Alice", "Single Room"));
+        history.addReservation(new Reservation("Bob", "Double Room"));
+        history.addReservation(new Reservation("Charlie", "Suite Room"));
 
-        manager.addService(reservationId, new Service("Breakfast", 20));
-        manager.addService(reservationId, new Service("Spa", 50));
-        manager.addService(reservationId, new Service("Airport Pickup", 30));
-
-        manager.displayServices(reservationId);
+        ReportService report = new ReportService();
+        report.generateReport(history.getAll());
     }
 }
